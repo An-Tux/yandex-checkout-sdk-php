@@ -28,8 +28,8 @@ namespace YandexCheckout\Request\Payments;
 
 use YandexCheckout\Model\AuthorizationDetails;
 use YandexCheckout\Model\CancellationDetails;
-use YandexCheckout\Model\Confirmation\ConfirmationRedirect;
 use YandexCheckout\Model\Confirmation\ConfirmationExternal;
+use YandexCheckout\Model\Confirmation\ConfirmationRedirect;
 use YandexCheckout\Model\ConfirmationType;
 use YandexCheckout\Model\Metadata;
 use YandexCheckout\Model\MonetaryAmount;
@@ -76,8 +76,10 @@ class PaymentsResponse
                 $payment->setDescription($paymentInfo['description']);
             }
             $payment->setCreatedAt(strtotime($paymentInfo['created_at']));
-            if ($method = $this->factoryPaymentMethod($paymentInfo['payment_method'])) {
-                $payment->setPaymentMethod($method);
+            if (!empty($paymentInfo['payment_method'])) {
+                $payment->setPaymentMethod(
+                    $this->factoryPaymentMethod($paymentInfo['payment_method'])
+                );
             }
             $payment->setPaid($paymentInfo['paid']);
             $payment->setRefundable($paymentInfo['refundable']);
@@ -190,8 +192,6 @@ class PaymentsResponse
      */
     private function factoryPaymentMethod($options)
     {
-        if (empty($options)) return null;
-
         $factory = new PaymentMethodFactory();
 
         return $factory->factoryFromArray($options);
